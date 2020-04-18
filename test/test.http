@@ -1,0 +1,19 @@
+# testing Anilist API calls
+
+
+### Get user  response: 1.12KB
+POST https://graphql.anilist.co HTTP/1.1
+Content-Type: application/json
+
+{
+    "query": "{User(search:\"barrettotte\"){id name statistics{anime{meanScore episodesWatched minutesWatched}}}}"
+}
+
+
+### Get anime list of user (array of lists)  response: 44.52KB
+POST https://graphql.anilist.co HTTP/1.1
+Content-Type: application/json
+
+{
+    "query": "{MediaListCollection(userId:247578, type:ANIME){lists{name entries{id completedAt{year month day}}}}}"
+}
