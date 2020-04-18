@@ -1,8 +1,9 @@
 #include "anilist8266.h"
 
-/* OLED instance */
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
+/* globals */
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1); /* OLED instance */
+WiFiClientSecure client;
+char queryBuffer[512];
 
 void setup(){
   initSerial();
@@ -10,32 +11,30 @@ void setup(){
   initWifi();
   delay(1500);
 
-  if(WiFi.status() == WL_CONNECTED){
-    char userQuery[512];
-    WiFiClientSecure client;
-    client.setInsecure(); // we're not sending anything sensitive (to allow HTTPS request)
-    sprintf(userQuery, "{User(search:\"%s\"){id name statistics{anime{episodesWatched minutesWatched}}}}", _ANILIST_USER);
-
-    // TODO: response struct
-    String resp = anilistRequest(client, userQuery);
-    Serial.println(resp.c_str());
-    delay(500);
-
-    StaticJsonDocument<256> respJson;
-    deserializeJson(respJson, resp);
-    
-    AnilistUser *user = createUser(respJson["data"]);
-    syncPrintfClr("user: %s\nid: %ld\nwatched:\n  %d episode(s)\n  %d day(s)\n", 
-      user->username, user->userId, user->episodesWatched, user->minutesWatched/1440);
-    respJson.clear(); // free up memory
-
-    delete user;
-  }
+  client.setInsecure(); // we're not sending anything sensitive (to allow HTTPS request)
+  sprintf(queryBuffer, 
+    "{User(search:\"%s\"){id name statistics{anime{episodesWatched minutesWatched}}}}", _ANILIST_USER);
 }
 
 
 void loop() {
-  //
+  if(WiFi.status() == WL_CONNECTED){
+    GraphqlQuery *graphql = anilistRequest(client, queryBuffer);
+    Serial.println(graphql->resp);
+    delay(1000);
+
+    StaticJsonDocument<256> respJson;
+    deserializeJson(respJson, graphql->resp);
+    delete graphql;
+    
+    AnilistUser *user = createUser(respJson["data"]);
+    syncPrintfClr("user: %s\nid:   %ld\n\nwatched:\n\n  %d episode(s)\n\n  %d day(s)\n", 
+      user->username, user->userId, user->episodesWatched, user->minutesWatched/1440);
+    
+    respJson.clear();
+    delete user;
+  }
+  delay(3600000); // once an hour
 }
 
 
@@ -52,36 +51,34 @@ AnilistUser *createUser(JsonObject data){
 }
 
 
-// HTTP POST to Anilist GraphQL API, return response as string
-String anilistRequest(WiFiClientSecure client, const char *query){
-  int status = 0;
-  char reqStr[512];
-  String resp;
+// HTTP POST to Anilist GraphQL API
+GraphqlQuery *anilistRequest(WiFiClientSecure client, const char *query){
+  GraphqlQuery *graphql = (GraphqlQuery *) malloc(sizeof(GraphqlQuery));
   HTTPClient http;
   StaticJsonDocument<200> reqJson;
 
-  syncPrintfClr("Sending HTTP POST request...");
+  syncPrintfClr("Sending HTTP POST\nrequest to\n\n%s", _ANILIST_HOST);
   http.begin(client, _ANILIST_HOST);
   http.addHeader("Content-Type", "application/json");
   reqJson["query"] = query;
 
-  serializeJson(reqJson, reqStr);
-  Serial.printf("HTTP REQ: %s\n", reqStr);
-  status = http.POST(reqStr);
+  serializeJson(reqJson, graphql->req);
+  Serial.printf("HTTP REQ: %s\n", graphql->req);
+  graphql->status = http.POST(graphql->req);
         
-  if(status > 0){
-    syncPrintf("\n\nHTTP POST %d\n", status);
-    resp = http.getString();
+  if(graphql->status > 0){
+    syncPrintf("\n\nHTTP POST %d\n", graphql->status);
+    strcpy(graphql->resp, http.getString().c_str());
 
-    if(status != HTTP_CODE_OK){  
-      Serial.printf("HTTP ERR: %s\n", resp.c_str());
+    if(graphql->status != HTTP_CODE_OK){  
+      Serial.printf("HTTP ERR: %s\n", graphql->resp);
     }
   } else{
-    Serial.printf("HTTP FAILED: %s\n", http.errorToString(status).c_str());
+    Serial.printf("HTTP FAILED: %s\n", http.errorToString(graphql->status).c_str());
   }
   http.end();
-  reqJson.clear(); // free up memory
-  return resp;
+  reqJson.clear();
+  return graphql;
 }
 
 
@@ -123,7 +120,7 @@ void initWifi(){
     delay(500);
     syncPrintf(".");
   }
-  syncPrintfClr("\nSSID: %s\nIP: %s\n", _WIFI_SSID, WiFi.localIP().toString().c_str());
+  syncPrintfClr("SSID: %s\nIP: %s\n", _WIFI_SSID, WiFi.localIP().toString().c_str());
 }
 
 

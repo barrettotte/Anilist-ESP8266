@@ -27,7 +27,17 @@
 #define SCREEN_HEIGHT 64
 
 #define SYNCPRINT_SIZE 256
+#define REQBUFF_SIZE   256
+#define RESPBUFF_SIZE  2048
+
 const char *_ANILIST_HOST = "https://graphql.anilist.co";
+
+
+typedef struct graphqlQuery{
+    char req[REQBUFF_SIZE];
+    int status;
+    char resp[RESPBUFF_SIZE];
+} GraphqlQuery;
 
 
 typedef struct anilistUser{
@@ -37,12 +47,13 @@ typedef struct anilistUser{
     int minutesWatched;    
 } AnilistUser;
 
+
 /* main */
 void initSerial();
 void initWifi();
 void initDisplay();
 
-String anilistRequest(WiFiClientSecure client, const char *query);
+GraphqlQuery *anilistRequest(WiFiClientSecure client, const char *query);
 AnilistUser *createUser(JsonObject data);
 
 /* display utils */
