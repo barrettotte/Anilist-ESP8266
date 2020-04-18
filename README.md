@@ -3,7 +3,9 @@
 A small Friday night project to use an ESP8266 to query Anilist GraphQL API and display profile data on a mini OLED.
 
 
-![OLED](screenshots/20200418_150318.jpg)
+<p align="center">
+  <img src="screenshots/20200418_150318.jpg" alt="OLED output" width="75%" height="75%"/>
+</p>
 
 
 ## Purpose
