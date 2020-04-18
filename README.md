@@ -3,6 +3,9 @@
 A small Friday night project to use an ESP8266 to query Anilist GraphQL API and display profile data on a mini OLED.
 
 
+![OLED](screenshots/20200418_150318.jpg)
+
+
 ## Purpose
 I haven't touched any Arduino stuff in a couple years, so I figured I needed a fun refresher before tackling a different project. This small project was used to learn more about [PlatformIO](https://platformio.org/) and HTTP requests on ESP8266.
 I used the Anilist API for this because I've already used it in a couple other weekend projects and it is super easy to mess around with.
@@ -24,11 +27,6 @@ const char *_WIFI_PWD  = "PASSWORD";
 
 #endif
 ```
-
-
-## Screenshots
-TODO:
-
 
 
 ## References
