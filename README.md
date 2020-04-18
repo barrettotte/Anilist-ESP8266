@@ -13,7 +13,7 @@ I used the Anilist API for this because I've already used it in a couple other w
 
 
 ## Configuration
-My small brain couldn't figure out loading secrets with [PlatformIO advanced scripting](https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html#construction-environments), so I just setup a separate header file called **anilist8266_config.h.h**.
+My small brain couldn't figure out loading secrets with [PlatformIO advanced scripting](https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html#construction-environments), so I just setup a separate header file called **anilist8266_config.h**.
 Its still plaintext credentials though...I think it works good enough for a messaround project.
 ```c
 /* include/anilist8266_config.h */
