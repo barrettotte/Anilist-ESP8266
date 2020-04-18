@@ -9,17 +9,18 @@ I used the Anilist API for this because I've already used it in a couple other w
 
 
 ## Configuration
-My small brain couldn't figure out loading secrets with [PlatformIO advanced scripting](https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html#construction-environments), so I just setup a separate header file called **config.h**.
-I think it works well enough.
+My small brain couldn't figure out loading secrets with [PlatformIO advanced scripting](https://docs.platformio.org/en/latest/projectconf/advanced_scripting.html#construction-environments), so I just setup a separate header file called **anilist8266_config.h.h**.
+Its still plaintext credentials though...I think it works good enough for a messaround project.
 ```c
-/* include/config.h */
+/* include/anilist8266_config.h */
 
-#ifndef ANILIST8266_CFG_H
-#define ANILIST8266_CFG_H
+#ifndef ANILIST8266_CONFIG_H
+#define ANILIST8266_CONFIG_H
 
-const String _ANILIST_USER = "user";
-const String _WIFI_SSID = "SSID";
-const String _WIFI_PWD  = "PASSWORD"; 
+const char *_ANILIST_USER = "user";
+
+const char *_WIFI_SSID = "SSID";
+const char *_WIFI_PWD  = "PASSWORD"; 
 
 #endif
 ```
@@ -32,6 +33,8 @@ TODO:
 
 ## References
 * [Arduino ESP8266HTTPClient Examples](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266HTTPClient/examples)
+* [Arduino JSON Examples](https://arduinojson.org/v6/example/)
+* [Arduino JSON Assistant](https://arduinojson.org/v6/assistant/)
 * [Introduction to PlatformIO](https://www.youtube.com/watch?v=0poh_2rBq7E)
 * [PlatformIO](https://platformio.org/)
 * [PlatformIO IDE Extension](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide)
